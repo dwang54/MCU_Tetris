@@ -377,12 +377,10 @@ void LCD_SetWindow(uint16_t xStart, uint16_t yStart, uint16_t xEnd, uint16_t yEn
 //===========================================================================
 void LCD_Clear(u16 Color)
 {
-    printf("we made it to begin. of clear\n");
     lcddev.select(1);
     unsigned int i,m;
     LCD_SetWindow(0,0,lcddev.width-1,lcddev.height-1);
     LCD_WriteData16_Prepare();
-    printf("zamnny\n");
     for(i=0;i<lcddev.height;i++)
     {
         for(m=0;m<lcddev.width;m++)
@@ -420,7 +418,6 @@ static void _LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 c)
     u16 t;
     volatile int xerr=0,yerr=0,delta_x,delta_y,distance;
     volatile int incx,incy,uRow,uCol;
-    printf("We are in _Drawline");
     delta_x=x2-x1;
     delta_y=y2-y1;
     uRow=x1;
@@ -661,6 +658,15 @@ void LCD_DrawFillTriangle(u16 x0,u16 y0, u16 x1,u16 y1, u16 x2,u16 y2, u16 c)
     }
     lcddev.select(0);
 }
+
+// Tetrominoe shapes
+void LCD_DrawI();
+void LCD_DrawO();
+void LCD_DrawT();
+void LCD_DrawS();
+void LCD_DrawZ();
+void LCD_DrawJ();
+void LCD_DrawL(); 
 
 // A 12x6 font
 const unsigned char asc2_1206[95][12]={
