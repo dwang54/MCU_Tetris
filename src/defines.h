@@ -24,7 +24,7 @@ void USART3_8_IRQHandler();
 void init_lcd_spi();
 
 
-
+// From gameloop.c 
 typedef enum _DIRECTION {
     LEFT,
     RIGHT,
@@ -36,5 +36,18 @@ typedef enum _ROTATION {
     COUNTERCLOCKWISE
 } ROTATION;
 
+
+void init_game();
+void draw_gridlines();
+void rotate_clockwise(uint8_t mat[4][4], uint8_t out[4][4]);
+void rotate_counterclockwise(uint8_t mat[4][4], uint8_t out[4][4]);
+void draw_block(int x, int y, uint16_t color);
+
+
+void game_over();
+void spawn_tetrominoes();       // "spawns/draws shape"
+void rotate_tetrominoes();
+void clear_lines();
+void move_piece(int x, int y);
 
 #endif
