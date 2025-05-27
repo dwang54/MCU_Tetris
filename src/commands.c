@@ -437,7 +437,6 @@ void shout(int argc, char *argv[])
 
 void clear(int argc, char *argv[])
 {
-    printf("We are here at this point\n");
     int value = 0;
     if (argc == 2)
         value = strtoul(argv[1], 0, 16);
@@ -521,7 +520,7 @@ struct commands_t cmds[] = {
         { "clear",    clear },
         { "drawline", drawline },
         { "drawrect", drawrect },
-        { "drawfillrect", drawfillrect },
+        { "drawfillrect", drawfillrect }
 };
 
 

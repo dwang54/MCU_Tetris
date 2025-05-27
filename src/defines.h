@@ -23,4 +23,18 @@ int __io_getchar(void);
 void USART3_8_IRQHandler();
 void init_lcd_spi();
 
+
+
+typedef enum _DIRECTION {
+    LEFT,
+    RIGHT,
+    DOWN
+} DIRECTION;
+
+typedef enum _ROTATION {
+    CLOCKWISE,
+    COUNTERCLOCKWISE
+} ROTATION;
+
+
 #endif
