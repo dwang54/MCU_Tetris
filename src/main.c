@@ -13,14 +13,19 @@
 
 void internal_clock();
 
-
 int main() {
     internal_clock();
+    LCD_Setup();        
+    init_keypad();
     init_usart5();
     enable_tty_interrupt();
     setbuf(stdin,0);
     setbuf(stdout,0);
     setbuf(stderr,0);
-    command_shell();
+    init_game();
+    
+    while (1) {
+        game_loop();
+    }
 }
 

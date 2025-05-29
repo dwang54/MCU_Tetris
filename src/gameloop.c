@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "defines.h"
 
 
@@ -11,9 +13,9 @@
 #define GRID_X_OFFSET 0
 #define GRID_Y_OFFSET 0
 #define POINTS 10                               // 10 points for each level cleared
-#define BLOCK_SIZE 10
+extern volatile char last_char_pressed;
 
-
+// colors for tetromino pieces
 const uint16_t colors[7] = {
     0x07FF, // I - Cyan
     0xFFE0, // O - Yellow
@@ -31,6 +33,8 @@ typedef struct {
 } Tetromino;
 
 int score = 0;
+uint16_t grid[GRID_ROWS][GRID_COLS] = {0};
+Tetromino current_piece;
 
 //============================================================================
 // Tetromino bitmaps
@@ -88,12 +92,12 @@ uint8_t tetrominoes[7][4][4] = {
 };
 
 //============================================================================
-// Initializes game
+// Initializes board
 //============================================================================
 void init_game() {
+    srand(time(NULL));
     LCD_DrawFillRectangle(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1, 0x0000); // black
     draw_gridlines();
-
 }
 
 //============================================================================
@@ -112,8 +116,40 @@ void draw_gridlines() {
 }
 
 
-uint8_t grid[GRID_ROWS][GRID_COLS] = {0};
-Tetromino current_piece;
+//============================================================================
+// Drawing a single block
+//============================================================================
+void draw_block(int x, int y, uint16_t color) {
+    int x0 = x * BLOCK_WIDTH;
+    int y0 = y * BLOCK_HEIGHT;
+    LCD_DrawFillRectangle(x0, y0, x0 + BLOCK_WIDTH - 1, y0 + BLOCK_HEIGHT - 1, color);
+    LCD_DrawRectangle(x0, y0, x0 + BLOCK_WIDTH - 1, y0 + BLOCK_HEIGHT - 1, 0xC618);
+
+}
+
+//============================================================================
+// Draws the current piece
+//============================================================================
+void draw_piece() {
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            if (current_piece.shape[i][j])
+                draw_block(current_piece.x + j, current_piece.y + i, current_piece.color);
+}
+
+int valid_position(int x, int y, uint8_t shape[4][4]) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (!shape[i][j]) continue;
+            int nx = x + j;
+            int ny = y + i;
+            if (nx < 0 || nx >= GRID_COLS || ny >= GRID_ROWS) return 0;
+            if (grid[ny][nx]) return 0;
+        }
+    }
+    return 1;
+}
+
 
 //============================================================================
 // Spawns a new random tetromino at top
@@ -132,38 +168,35 @@ void spawn_piece() {
     if (!valid_position(current_piece.x, current_piece.y, current_piece.shape)) {
         printf("Game Over!\n");
         while (1); // Halts the game. Alternatively, reset or prompt restart.
+    } else {
+        draw_piece();
+
     }
 }
 
 
-//============================================================================
-// Drawing a single block
-//============================================================================
-void draw_block(int x, int y, uint16_t color) {
-    int x0 = x * BLOCK_SIZE;
-    int y0 = y * BLOCK_SIZE;
-    LCD_DrawFillRectangle(x0, y0, x0 + BLOCK_SIZE - 1, y0 + BLOCK_SIZE - 1, color);
-}
-
-//============================================================================
-// Draws the current piece
-//============================================================================
-void draw_piece() {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            if (current_piece.shape[i][j])
-                draw_block(current_piece.x + j, current_piece.y + i, current_piece.color);
-}
 
 //============================================================================
 // Erases the current piece
 //============================================================================
 void erase_piece() {
-    for (int i = 0; i < 4; i++)
-        for (int j = 0; j < 4; j++)
-            if (current_piece.shape[i][j])
-                draw_block(current_piece.x + j, current_piece.y + i, 0x0000);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (current_piece.shape[i][j]) {
+                int x = current_piece.x + j;
+                int y = current_piece.y + i;
+                int x0 = x * BLOCK_WIDTH;
+                int y0 = y * BLOCK_HEIGHT;
+                LCD_DrawFillRectangle(x0, y0, x0 + BLOCK_WIDTH - 1, y0 + BLOCK_HEIGHT - 1, 0x0000);
+                LCD_DrawLine(x0, y0, x0 + BLOCK_WIDTH - 1, y0, 0x7BEF);
+                LCD_DrawLine(x0, y0 + BLOCK_HEIGHT - 1, x0 + BLOCK_WIDTH - 1, y0 + BLOCK_HEIGHT - 1, 0x7BEF);
+                LCD_DrawLine(x0, y0, x0, y0 + BLOCK_HEIGHT - 1, 0x7BEF);
+                LCD_DrawLine(x0 + BLOCK_WIDTH - 1, y0, x0 + BLOCK_WIDTH - 1, y0 + BLOCK_HEIGHT - 1, 0x7BEF);
+            }
+        }
+    }
 }
+
 //============================================================================
 // Clockwise rotation for tetromino
 //============================================================================
@@ -181,23 +214,6 @@ void rotate_counterclockwise(uint8_t mat[4][4], uint8_t out[4][4]) {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
             out[3 - j][i] = mat[i][j];
-}
-
-
-//============================================================================
-// Check if a position is valid for current piece
-//============================================================================
-int valid_position(int x, int y, uint8_t shape[4][4]) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (!shape[i][j]) continue;
-            int nx = x + j;
-            int ny = y + i;
-            if (nx < 0 || nx >= GRID_COLS || ny >= GRID_ROWS) return 0;
-            if (grid[ny][nx]) return 0;
-        }
-    }
-    return 1;
 }
 
 
@@ -254,6 +270,7 @@ void drop_piece() {
         current_piece.y++;
     } else {
         lock_piece();
+        draw_grid_state();
         int lines = clear_lines();
         if (lines > 0) {
             score += lines * POINTS;
@@ -303,20 +320,49 @@ void draw_grid_state() {
     }
 }
 
-
 void game_loop() {
-    init_game();
-    spawn_piece();
-    draw_piece();
+    spawn_piece();        // Initialize first piece
+    printf("We made it here!\n");
+
+    uint32_t last_drop_time = SysTick->VAL;  // SysTick counts down
+    const uint32_t drop_interval = 2400000;   // Adjust this for drop speed
 
     while (1) {
-        // poll input: move_left(), move_right(), rotate_current()
-        // optional: drop fast if key held
+        // === Drop piece every interval ===
+        uint32_t elapsed = (last_drop_time - SysTick->VAL) & 0xFFFFFF;
+        if (elapsed > drop_interval) {
+            drop_piece();
+            last_drop_time = SysTick->VAL;
+        }
 
-        delay_ms(500); // control speed
-        drop_piece();  // advance one row
+        // === Handle input ===
+        char key = last_char_pressed;
+        last_char_pressed = 0;
 
-        draw_grid_state();  // refresh background grid
+        switch (key) {
+            case '8':   // move left
+                move_left();
+                break;
+            case 'C':   // move right
+                move_right();
+                break;
+            case '6':   // rotate clockwise
+                rotate_current(1);
+                break;
+            case '5':   // rotate counterclockwise
+                rotate_current(0);
+                break;
+            case '9':   // drop instantly
+                while (valid_position(current_piece.x, current_piece.y + 1, current_piece.shape)) {
+                    erase_piece();
+                    current_piece.y++;
+                    draw_piece();
+                }
+                drop_piece();
+                break;
+            default:
+                break;
+        }
     }
 }
 

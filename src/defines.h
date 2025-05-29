@@ -41,13 +41,30 @@ void init_game();
 void draw_gridlines();
 void rotate_clockwise(uint8_t mat[4][4], uint8_t out[4][4]);
 void rotate_counterclockwise(uint8_t mat[4][4], uint8_t out[4][4]);
-void draw_block(int x, int y, uint16_t color);
+void draw_block(int x, int y, uint16_t color);  // good
+void game_loop();
+int clear_lines();
+void spawn_piece();                             // good
+void erase_piece();                             // good
+void move_left();                               // good
+void rotate_current(int clockwise);             // good
+void drop_piece();
 
 
-void game_over();
-void spawn_tetrominoes();       // "spawns/draws shape"
-void rotate_tetrominoes();
-void clear_lines();
-void move_piece(int x, int y);
+
+// from keypad.c
+void init_keypad();
+
+// from lcd.c
+typedef uint8_t u8;
+typedef uint16_t u16;
+
+void LCD_Setup();
+void LCD_DrawFillRectangle(u16 x1, u16 y1, u16 x2, u16 y2, u16 c);
+void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2, u16 c);
+void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2, u16 c);
+
+// from commands.c
+void lcd_init(int argc, char *argv[]);
 
 #endif

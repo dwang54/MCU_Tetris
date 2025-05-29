@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "lcd.h"
+#include "defines.h"
 
 void nano_wait(int t);
 
@@ -659,14 +660,7 @@ void LCD_DrawFillTriangle(u16 x0,u16 y0, u16 x1,u16 y1, u16 x2,u16 y2, u16 c)
     lcddev.select(0);
 }
 
-// Tetrominoe shapes
-void LCD_DrawI();
-void LCD_DrawO();
-void LCD_DrawT();
-void LCD_DrawS();
-void LCD_DrawZ();
-void LCD_DrawJ();
-void LCD_DrawL(); 
+
 
 // A 12x6 font
 const unsigned char asc2_1206[95][12]={
